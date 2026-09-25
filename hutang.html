@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinTrack — Hutang &amp; Piutang</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen">
+
+<!-- ===================================================================
+     NAVBAR
+=================================================================== -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+      </svg>
+      FinTrack
+    </a>
+
+    <nav class="navbar-nav">
+      <a href="index.html"    class="nav-link">3-Bucket</a>
+      <a href="tracking.html" class="nav-link">Tracking Bulanan</a>
+      <a href="hutang.html"   class="nav-link active">Hutang &amp; Piutang</a>
+    </nav>
+
+    <div style="flex-shrink:0;min-width:1px"></div>
+  </div>
+</header>
+
+<!-- ===================================================================
+     MAIN CONTENT
+=================================================================== -->
+<main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+  <!-- Page Title -->
+  <div>
+    <h1 class="text-xl font-bold text-slate-800">Hutang &amp; Piutang</h1>
+    <p class="text-sm text-slate-400 mt-0.5">Catat dan pantau semua transaksi hutang dan piutang Anda.</p>
+  </div>
+
+  <!-- ==== SECTION 1: Summary Cards ==== -->
+  <section>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+      <!-- Total Piutang -->
+      <div class="stat-card relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-sky-50 to-white pointer-events-none rounded-2xl"></div>
+        <div class="relative">
+          <div class="label" style="color:#0284c7">Total Piutang (Belum Lunas)</div>
+          <div id="statPiutang" class="value" style="color:#0369a1">Rp 0</div>
+          <p class="text-xs text-slate-400 mt-1">Orang hutang ke saya</p>
+        </div>
+      </div>
+
+      <!-- Total Hutang -->
+      <div class="stat-card relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-50 to-white pointer-events-none rounded-2xl"></div>
+        <div class="relative">
+          <div class="label" style="color:#f97316">Total Hutang (Belum Dibayar)</div>
+          <div id="statHutang" class="value" style="color:#c2410c">Rp 0</div>
+          <p class="text-xs text-slate-400 mt-1">Kewajiban saya ke orang lain</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==== SECTION 2: Form Pencatatan ==== -->
+  <section>
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+      <h3 class="font-semibold text-slate-700 mb-1">+ Tambah Catatan Baru</h3>
+      <p class="text-xs text-slate-400 mb-4">Pilih tipe, isi data, lalu simpan.</p>
+
+      <form id="debtForm" class="space-y-4" novalidate>
+        <!-- Tipe: Piutang / Hutang -->
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-2">Tipe Catatan</label>
+          <div class="flex gap-3">
+            <label class="flex-1 flex items-start gap-2.5 border border-slate-200 rounded-xl px-4 py-3 cursor-pointer has-[:checked]:border-sky-400 has-[:checked]:bg-sky-50">
+              <input type="radio" name="debtType" value="piutang" checked class="mt-0.5 accent-sky-500" />
+              <div>
+                <span class="block text-sm font-semibold text-slate-700">Piutang</span>
+                <span class="text-xs text-slate-400">Orang hutang ke saya</span>
+              </div>
+            </label>
+            <label class="flex-1 flex items-start gap-2.5 border border-slate-200 rounded-xl px-4 py-3 cursor-pointer has-[:checked]:border-orange-400 has-[:checked]:bg-orange-50">
+              <input type="radio" name="debtType" value="hutang" class="mt-0.5 accent-orange-500" />
+              <div>
+                <span class="block text-sm font-semibold text-slate-700">Hutang</span>
+                <span class="text-xs text-slate-400">Saya hutang ke orang lain</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Grid: Nama + Nominal -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Nama Orang / Pihak</label>
+            <input id="debtParty" type="text" placeholder="Contoh: Budi Santoso"
+              class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent" required />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Nominal (Rp)</label>
+            <input id="debtAmount" type="number" min="1" placeholder="Contoh: 500000"
+              class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent" required />
+          </div>
+        </div>
+
+        <!-- Grid: Tanggal Pinjam + Jatuh Tempo -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Tanggal Pinjam</label>
+            <input id="debtDateFrom" type="date"
+              class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent" required />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">
+              Jatuh Tempo
+              <span class="font-normal text-slate-400">(opsional)</span>
+            </label>
+            <input id="debtDateDue" type="date"
+              class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent" />
+          </div>
+        </div>
+
+        <!-- Catatan -->
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-1">
+            Catatan / Keterangan
+            <span class="font-normal text-slate-400">(opsional)</span>
+          </label>
+          <input id="debtNote" type="text" placeholder="Contoh: Pinjaman untuk kebutuhan darurat"
+            class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent" />
+        </div>
+
+        <button type="submit"
+          class="w-full bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white font-semibold text-sm rounded-xl py-2.5">
+          Simpan Catatan
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==== SECTION 3: Tabel Daftar Hutang & Piutang ==== -->
+  <section>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- Header + Filter -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-4 border-b border-slate-100 gap-3">
+        <div>
+          <h3 class="font-semibold text-slate-700">Daftar Hutang &amp; Piutang</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Semua catatan tersimpan — klik tombol untuk mengubah status</p>
+        </div>
+        <!-- Filter Dropdown -->
+        <select id="debtFilter"
+          class="text-xs font-medium border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent bg-white">
+          <option value="all">Tampilkan: Semua</option>
+          <option value="belum">Belum Lunas</option>
+          <option value="lunas">Sudah Lunas</option>
+        </select>
+      </div>
+
+      <!-- Tabel -->
+      <div class="table-scroll overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+              <th class="text-center px-4 py-3 font-medium">Status</th>
+              <th class="text-left  px-4 py-3 font-medium">Tipe</th>
+              <th class="text-left  px-4 py-3 font-medium">Nama Pihak</th>
+              <th class="text-right px-4 py-3 font-medium">Nominal</th>
+              <th class="text-left  px-4 py-3 font-medium">Tgl. Pinjam</th>
+              <th class="text-left  px-4 py-3 font-medium">Jatuh Tempo</th>
+              <th class="text-left  px-4 py-3 font-medium">Keterangan</th>
+              <th class="text-center px-4 py-3 font-medium">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="debtTableBody"></tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div id="debtEmpty" class="py-16 text-center text-slate-400">
+          <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <p class="text-sm font-medium text-slate-400">Belum ada catatan hutang/piutang</p>
+          <p class="text-xs text-slate-300 mt-1">Gunakan formulir di atas untuk menambahkan catatan baru.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast Container -->
+<div id="toastContainer"
+  class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
+
+<!-- Scripts -->
+<script src="app.js"></script>
+
+</body>
+</html>

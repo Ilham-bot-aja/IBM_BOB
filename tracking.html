@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinTrack — Tracking Bulanan</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen">
+
+<!-- ===================================================================
+     NAVBAR
+=================================================================== -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+      </svg>
+      FinTrack
+    </a>
+
+    <nav class="navbar-nav">
+      <a href="index.html"    class="nav-link">3-Bucket</a>
+      <a href="tracking.html" class="nav-link active">Tracking Bulanan</a>
+      <a href="hutang.html"   class="nav-link">Hutang &amp; Piutang</a>
+    </nav>
+
+    <!-- spacer agar konsisten dengan halaman lain -->
+    <div style="flex-shrink:0;min-width:1px"></div>
+  </div>
+</header>
+
+<!-- ===================================================================
+     MAIN CONTENT
+=================================================================== -->
+<main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+  <!-- Page Title -->
+  <div>
+    <h1 class="text-xl font-bold text-slate-800">Tracking Bulanan</h1>
+    <p class="text-sm text-slate-400 mt-0.5">Ringkasan pemasukan &amp; pengeluaran per bulan berdasarkan riwayat transaksi.</p>
+  </div>
+
+  <!-- ==== SECTION 1: Summary Cards ==== -->
+  <section>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+      <!-- Total Pemasukan -->
+      <div class="stat-card relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 to-white pointer-events-none rounded-2xl"></div>
+        <div class="relative">
+          <div class="label" style="color:#059669">Total Pemasukan</div>
+          <div id="statTotalIncome" class="value" style="color:#065f46">Rp 0</div>
+          <p class="text-xs text-slate-400 mt-1">Akumulatif semua bulan</p>
+        </div>
+      </div>
+
+      <!-- Total Pengeluaran -->
+      <div class="stat-card relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-red-50 to-white pointer-events-none rounded-2xl"></div>
+        <div class="relative">
+          <div class="label" style="color:#ef4444">Total Pengeluaran</div>
+          <div id="statTotalExpense" class="value" style="color:#b91c1c">Rp 0</div>
+          <p class="text-xs text-slate-400 mt-1">Akumulatif semua bulan</p>
+        </div>
+      </div>
+
+      <!-- Net Cash Flow -->
+      <div class="stat-card relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-sky-50 to-white pointer-events-none rounded-2xl"></div>
+        <div class="relative">
+          <div class="label" style="color:#0284c7">Arus Kas Bersih</div>
+          <div id="statNetFlow" class="value">Rp 0</div>
+          <p class="text-xs text-slate-400 mt-1">Pemasukan − Pengeluaran</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==== SECTION 2: Bar Chart ==== -->
+  <section>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100">
+        <h3 class="font-semibold text-slate-700">Diagram Pemasukan &amp; Pengeluaran</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Perbandingan per bulan — hijau = pemasukan, merah = pengeluaran</p>
+      </div>
+      <div id="chartWrapper" class="px-5 py-5" style="position:relative;height:300px">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== SECTION 3: Monthly Summary Table ==== -->
+  <section>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100">
+        <h3 class="font-semibold text-slate-700">Ringkasan Neraca Per Bulan</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Rincian arus kas bulanan — surplus jika pemasukan &gt; pengeluaran</p>
+      </div>
+
+      <div class="table-scroll overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+              <th class="text-left px-5 py-3 font-medium">Bulan</th>
+              <th class="text-right px-5 py-3 font-medium">Total Masuk</th>
+              <th class="text-right px-5 py-3 font-medium">Total Keluar</th>
+              <th class="text-right px-5 py-3 font-medium">Selisih / Net</th>
+              <th class="text-center px-5 py-3 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody id="monthlyTableBody"></tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div id="tableEmpty" class="hidden py-16 text-center text-slate-400">
+          <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <p class="text-sm font-medium text-slate-400">Belum ada data transaksi</p>
+          <p class="text-xs text-slate-300 mt-1">
+            Tambahkan transaksi di halaman
+            <a href="index.html" class="text-sky-500 hover:underline">3-Bucket</a> terlebih dahulu.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast Container -->
+<div id="toastContainer"
+  class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
+
+<!-- Scripts -->
+<script src="app.js"></script>
+
+</body>
+</html>
